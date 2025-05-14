@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Ingestion</title>
+</head>
+<body>
+    <h1>Select Source and Destination</h1>
+    <form method="post" action="/ingest">
+        <label>Source Type:</label>
+        <select name="source_type">
+            <option value="sftp">SFTP</option>
+            <option value="s3">S3</option>
+        </select><br><br>
+
+        <label>Remote Path (Source):</label>
+        <input type="text" name="remote_path"><br><br>
+
+        <label>Destination Path (Local):</label>
+        <input type="text" name="local_path" value="/tmp/fetched_file"><br><br>
+
+        <button type="submit">Ingest</button>
+    </form>
+</body>
+</html>

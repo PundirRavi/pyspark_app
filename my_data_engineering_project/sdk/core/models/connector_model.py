@@ -1,7 +1,7 @@
-from pydantic import BaseModel, HttpUrl, Field
+from pydantic import BaseModel, HttpUrl, Field, BaseSettings
 from typing import Optional, Literal
 
-class SFTPConnector(BaseModel):
+class SFTPConnector(BaseSettings):
     """
     Configuration for SFTP connector.
     """
@@ -12,6 +12,10 @@ class SFTPConnector(BaseModel):
     remote_path: str = Field(..., description="Remote path on the SFTP server")
     local_path: str = Field(..., description="Local path to save files")
     protocol: Literal["sftp"] = "sftp"  # Fixed value for SFTP
+
+    class Config:
+        env_prefix = ".env"  # Prefix for environment variables
+        env_file = ".env"  # Path to the environment file
 
 class S3Connector(BaseModel):
     """
