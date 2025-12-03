@@ -1,0 +1,71 @@
+<!-- templates/create_ingestion_job.html -->
+<form method="post" action="/create_job">
+    <label>Job Name</label>
+    <input name="job_name" type="text" required />
+
+    <label>Source Type</label>
+    <select name="source_type" required>
+        <option value="sftp">SFTP</option>
+        <option value="aws_s3">AWS S3</option>
+        <option value="gcp_bucket">GCP Bucket</option>
+        <option value="azure_blob">Azure Blob</option>
+        <option value="local">Local</option>
+        <option value="api">API</option>
+    </select>
+
+    <label>Source Path</label>
+    <input name="source_path" type="text" required />
+
+    <label>Destination Type</label>
+    <select name="destination_type" required>
+        <option value="sftp">SFTP</option>
+        <option value="aws_s3">AWS S3</option>
+        <option value="gcp_bucket">GCP Bucket</option>
+        <option value="azure_blob">Azure Blob</option>
+        <option value="local">Local</option>
+    </select>
+
+    <label>Destination Path</label>
+    <input name="destination_path" type="text" required />
+
+    <label>File Type</label>
+    <select name="file_type" required>
+        <option value="csv">CSV</option>
+        <option value="excel">Excel</option>
+        <option value="json">JSON</option>
+        <option value="parquet">Parquet</option>
+        <option value="hl7">HL7</option>
+        <option value="ccda">CCDA</option>
+        <option value="fhir">FHIR</option>
+        <option value="other">Other</option>
+    </select>
+
+    <label>Schedule Type</label>
+    <select name="schedule_type" id="schedule_type" required onchange="toggleScheduleFields()">
+        <option value="one-time">One-time</option>
+        <option value="recurring">Recurring</option>
+    </select>
+
+    <div id="one-time-section">
+        <label>Schedule Time</label>
+        <input name="schedule_time" type="datetime-local" />
+    </div>
+
+    <div id="recurring-section" style="display:none;">
+        <label>Cron Expression</label>
+        <input name="cron_expression" type="text" placeholder="e.g. 0 9 * * MON" />
+    </div>
+
+    <label>Description (optional)</label>
+    <textarea name="description" rows="3"></textarea>
+
+    <button type="submit">Create Ingestion Job</button>
+</form>
+
+<script>
+function toggleScheduleFields() {
+    const type = document.getElementById("schedule_type").value;
+    document.getElementById("one-time-section").style.display = (type === "one-time") ? "block" : "none";
+    document.getElementById("recurring-section").style.display = (type === "recurring") ? "block" : "none";
+}
+</script>

@@ -4,21 +4,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f9fc;
+            padding: 2rem;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.6rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .optional {
+            font-weight: normal;
+            font-style: italic;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .link a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h2>Register</h2>
+    
     <form method="post" action="/register">
-        <input name="username" placeholder="Username" required>
-        <input name="password" type="password" placeholder="Password" required>
-        <input name="email" placeholder="Email" required>
-        <input name="first_name" placeholder="First Name" required>
-        <input name="last_name" placeholder="Last Name" required>
-        <input name="phone_number" placeholder="Phone Number" required>
-        <input name="gender" placeholder="Gender" required>
-        <input name="date_of_birth" placeholder="YYYY-MM-DD" required>
+        <h2>Register</h2>
+        {% if error %}
+        <p style="color:red;">{{ error }}</p>
+        {% endif %}
+        {% if success %}
+        <p style="color:green;">{{ success }}</p>
+        <div class="link">
+            <a href="/login">Click here to login</a>
+        </div>
+        {% endif %}
+
+        <label for="username">Username *</label>
+        <input id="username" name="username" required>
+
+        <label for="password">Password *</label>
+        <input id="password" name="password" type="password" required>
+
+        <label for="email">Email <span class="optional">(Optional)</span></label>
+        <input id="email" name="email" type="email">
+
+        <label for="first_name">First Name *</label>
+        <input id="first_name" name="first_name" required>
+
+        <label for="last_name">Last Name *</label>
+        <input id="last_name" name="last_name" required>
+
+        <label for="phone_number">Phone Number <span class="optional">(Optional)</span></label>
+        <input id="phone_number" name="phone_number" type="tel">
+
+        <label for="gender">Gender *</label>
+        <select id="gender" name="gender" required>
+            <option value="">-- Select Gender --</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Unknown">Unknown</option>
+        </select>
+
+        <label for="date_of_birth">Date of Birth *</label>
+        <input id="date_of_birth" name="date_of_birth" type="date" required>
+
         <button type="submit">Register</button>
+
+        <div class="link">
+            <a href="/login">Already have an account? Login here.</a>
+        </div>
     </form>
-    <br>
-    <a href="/login">Already have an account? Login here.</a>
 </body>
 </html>

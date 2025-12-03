@@ -1,24 +1,260 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Data Ingestion</title>
+    <meta charset="UTF-8">
+    <title>Data Ingestion Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-button {
+            background-color: #34495e;
+            border: none;
+            color: white;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            color: black;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 6px;
+        }
+
+        .dropdown-content form {
+            margin: 0;
+        }
+
+        .dropdown-content button {
+            width: 100%;
+            border: none;
+            background: none;
+            padding: 0.8rem 1rem;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .dropdown-content button:hover {
+            background-color: #f1f1f1;
+        }
+
+        .user-menu:hover .dropdown-content {
+            display: block;
+        }
+
+        .tab-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .tab-link {
+            padding: 0.75rem 1.5rem;
+            margin: 0 0.5rem;
+            border: none;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .tab-link:hover {
+            background-color: #ccc;
+        }
+
+        .tab-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            max-width: 800px;
+            margin: auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 1rem;
+            display: block;
+        }
+
+        select, input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 0.6rem;
+            margin-top: 0.3rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 1rem;
+            color: #777;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
-    <h1>Select Source and Destination</h1>
-    <form method="post" action="/ingest">
-        <label>Source Type:</label>
-        <select name="source_type">
-            <option value="sftp">SFTP</option>
-            <option value="s3">S3</option>
-        </select><br><br>
+<header>
+    <div class="brand">Data Ingestion</div>
+    <div class="user-menu">
+        <button class="user-button">User Account ▼</button>
+        <div class="dropdown-content">
+            <div style="padding: 0.75rem; font-weight: bold;">
+                {{ username }}<br>
+                <small>Last login: {{ last_login }}</small>
+            </div>
+            <form method="post" action="/deactivate">
+                <button type="submit">Deactivate Account</button>
+            </form>
+            <form method="post" action="/logout">
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </div>
+</header>
+<main>
+    <h1>Data Ingestion Dashboard</h1>
+    <div class="tab-nav">
+    
+        <button class="tab-link" onclick="window.location.href='/deploy-schema'">Deploy Schema</button>
+        <button class="tab-link active" onclick="openTab(event, 'raw-load')">Raw Files Load</button>
+        <button class="tab-link" onclick="openTab(event, 'create-jobs')">Create Ingestion Jobs</button>
+        <button class="tab-link" onclick="openTab(event, 'job-logs')">Running Jobs and Logs</button>
+    </div>
 
-        <label>Remote Path (Source):</label>
-        <input type="text" name="remote_path"><br><br>
+    <div id="raw-load" class="tab-content" style="display: block;">
+        <form method="post" action="/ingest" enctype="multipart/form-data">
+            <label for="operation">Operation</label>
+            <select name="operation" id="operation" required>
+                <option value="download">Download from Source to Local</option>
+                <option value="upload">Upload from Local to Destination</option>
+                <option value="transfer">Transfer between Sources</option>
+                <option value="api">Extract via API (e.g., Kaggle)</option>
+            </select>
 
-        <label>Destination Path (Local):</label>
-        <input type="text" name="local_path" value="/tmp/fetched_file"><br><br>
+            <label for="source_type">Source Type</label>
+            <select name="source_type" id="source_type">
+                <option value="">-- Select Source --</option>
+                <option value="local">Local Machine</option>
+                <option value="sftp">SFTP</option>
+                <option value="aws_s3">AWS S3</option>
+                <option value="gcp_bucket">GCP Bucket</option>
+                <option value="azure_blob">Azure Blob</option>
+                <option value="api">API</option>
+            </select>
 
-        <button type="submit">Ingest</button>
-    </form>
+            <label for="remote_path">Source Path / API URL</label>
+            <input type="text" name="remote_path" id="remote_path" placeholder="Enter remote path or API URL">
+
+            <label for="upload_file">Upload File (for local to remote)</label>
+            <input type="file" name="upload_file" id="upload_file">
+
+            <label for="destination_type">Destination Type</label>
+            <select name="destination_type" id="destination_type">
+                <option value="">-- Select Destination --</option>
+                <option value="local">Local Machine</option>
+                <option value="sftp">SFTP</option>
+                <option value="aws_s3">AWS S3</option>
+                <option value="gcp_bucket">GCP Bucket</option>
+                <option value="azure_blob">Azure Blob</option>
+            </select>
+
+            <label for="local_path">Destination Path</label>
+            <input type="text" name="local_path" id="local_path" value="/tmp/output_file">
+
+            <label for="file_type">File Type</label>
+            <select name="file_type" id="file_type" required>
+                <option value="csv">CSV</option>
+                <option value="excel">Excel</option>
+                <option value="json">JSON</option>
+                <option value="ccda">CCDA</option>
+                <option value="hl7">HL7</option>
+                <option value="fhir">FHIR</option>
+                <option value="parquet">Parquet</option>
+                <option value="other">Other</option>
+            </select>
+
+            <button type="submit">Execute Action</button>
+        </form>
+    </div>
+
+    <div id="create-jobs" class="tab-content">
+        <p>To be implemented.</p>
+    </div>
+
+    <div id="job-logs" class="tab-content">
+        <p>To be implemented.</p>
+    </div>
+</main>
+<div class="footer">&copy; 2025 Data Platform | Built with FastAPI</div>
+<script>
+    function openTab(evt, tabId) {
+        const tabContents = document.querySelectorAll(".tab-content");
+        const tabLinks = document.querySelectorAll(".tab-link");
+
+        tabContents.forEach(tab => tab.style.display = "none");
+        tabLinks.forEach(link => link.classList.remove("active"));
+
+        document.getElementById(tabId).style.display = "block";
+        evt.currentTarget.classList.add("active");
+    }
+</script>
 </body>
 </html>
