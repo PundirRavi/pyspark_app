@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Deploy Schema</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      margin: 0; padding: 2rem;
+      display: flex; justify-content: center; align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      max-width: 480px;
+      width: 100%;
+      padding: 2.5rem 3rem;
+    }
+    h1 {
+      margin-top: 0;
+      color: #1e293b;
+      font-weight: 700;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 1.25rem;
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: #334155;
+    }
+    select, button {
+      font-size: 1rem;
+      width: 100%;
+      padding: 0.55rem 12px;
+      border-radius: 8px;
+      border: 1.8px solid #cbd5e1;
+      background-color: #f8fafc;
+      appearance: none;
+      cursor: pointer;
+      transition: border-color 0.25s ease, background-color 0.25s ease;
+    }
+    select:focus {
+      outline: none;
+      border-color: #60a5fa;
+      background-color: #ffffff;
+    }
+    button {
+      background: linear-gradient(90deg,#2563eb,#1d4ed8);
+      color: white;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      box-shadow: 0 10px 35px rgba(37,99,235,0.3);
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: linear-gradient(90deg,#1e40af,#1e3a8a);
+    }
+    .message {
+      margin-top: 1.6rem;
+      padding: 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-align: center;
+    }
+    .message.success {
+      background-color: #d1fae5;
+      color: #166534;
+      border: 1.5px solid #a7f3d0;
+    }
+    .message.error {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border: 1.5px solid #fecaca;
+    }
+    .note {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: -0.9rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+    <h2>Deploy Schema</h2>
+    {% if message %}
+        <p><strong>{{ message }}</strong></p>
+    {% endif %}
+
+    <form method="post" action="/deploy-schema">
+        <label for="db_type">Database Type:</label>
+        <select id="db_type" name="db_type" required>
+            <option value="">Select DB Type</option>
+            {% for dt in database_types %}
+                <option value="{{ dt }}" {% if dt == selected_dbtype %}selected{% endif %}>{{ dt.capitalize() }}</option>
+            {% endfor %}
+        </select><br/><br/>
+
+        <label for="database">Database:</label>
+        <select id="database" name="database" required>
+            <option value="">Select Database</option>
+            {% for db in databases %}
+                <option value="{{ db }}">{{ db }}</option>
+            {% endfor %}
+        </select><br/><br/>
+
+        <label for="schema">Schema:</label>
+        <select id="schema" name="schema" required>
+            <option value="">Select Schema</option>
+            {% for s in schemas %}
+                <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+        </select><br/><br/>
+
+        <label for="schema_version">Schema Version:</label>
+        <select id="schema_version" name="schema_version" required>
+            {% for sv in schema_versions %}
+                <option value="{{ sv }}">{{ sv }}</option>
+            {% endfor %}
+        </select><br/><br/>
+
+        <button type="submit">Deploy</button>
+    </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const dbTypeSelect = document.getElementById("db_type");
+            const databaseSelect = document.getElementById("database");
+            const schemaSelect = document.getElementById("schema");
+
+            // When DB type changes, reload page with new selection to fetch dynamic DBs if snowflake
+            dbTypeSelect.addEventListener("change", () => {
+                const selectedDbType = dbTypeSelect.value;
+                window.location.href = `/deploy-schema?db_type=${selectedDbType}`;
+            });
+
+            // When Database changes, fetch schemas dynamically
+            databaseSelect.addEventListener("change", async () => {
+                const selectedDb = databaseSelect.value;
+                schemaSelect.innerHTML = '<option value="">Loading...</option>';
+                if (!selectedDb) {
+                    schemaSelect.innerHTML = '<option value="">Select Schema</option>';
+                    return;
+                }
+                try {
+                    const response = await fetch(`/api/schemas?db=${encodeURIComponent(selectedDb)}`);
+                    const data = await response.json();
+                    schemaSelect.innerHTML = '<option value="">Select Schema</option>';
+                    data.schemas.forEach(schema => {
+                        const option = document.createElement('option');
+                        option.value = schema;
+                        option.textContent = schema;
+                        schemaSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    schemaSelect.innerHTML = '<option value="">Error loading schemas</option>';
+                    console.error(error);
+                }
+            });
+
+            // Automatically load schemas for initial database selection
+            if (databaseSelect.value) {
+                databaseSelect.dispatchEvent(new Event("change"));
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+  hangeSet id="2-add-column" author="ravi">
+    <sql>
+      ALTER TABLE dummy_table ADD COLUMN created_at TIMESTAMP_LTZ DEFAULT CURRENT_TIMESTAMP;
+    </sql>
+    <rollback>
+      ALTER TABLE dummy_table DROP COLUMN created_at;
+    </rollback>
+  </changeSet>
+
+</databaseChangeLog>
